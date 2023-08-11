@@ -1,14 +1,16 @@
 #! /bin/sh
+# shellcheck disable=SC3028,SC2086
+set -eu
 
 USER=mdc
 config_file="/config/mdc.ini"
 
 echo "---Setup Timezone to ${TZ}---"
-echo "${TZ}" > /etc/timezone
+echo "${TZ}" >/etc/timezone
 echo "---Checking if UID: ${UID} matches user---"
 usermod -o -u ${UID} ${USER}
 echo "---Checking if GID: ${GID} matches user---"
-groupmod -o -g ${GID} ${USER} > /dev/null 2>&1 ||:
+groupmod -o -g ${GID} ${USER} >/dev/null 2>&1 || :
 usermod -g ${GID} ${USER}
 echo "---Setting umask to ${UMASK}---"
 umask ${UMASK}
@@ -18,7 +20,7 @@ if [ ! -d /config ]; then
     echo "---no config folder found, create...---"
     mkdir -p /config
 fi
-chown -R ${UID}:${GID} /data /config 
+chown -R ${UID}:${GID} /data /config
 
 echo "Checking if config file exist"
 if [ ! -f "${config_file}" ]; then
@@ -30,4 +32,4 @@ fi
 
 echo "Starting..."
 cd /data
-gosu ${USER} /app/Movie_Data_Capture
+exec gosu ${USER} /app/Movie_Data_Capture "$@"
